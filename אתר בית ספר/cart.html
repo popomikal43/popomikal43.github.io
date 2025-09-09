@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>עגלת קניות | חנות סוס</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-content">
+            <a href="cart.html" class="cart-icon-link">
+                <img src="images/עגלת קניות.jpg" alt="עגלת קניות" class="cart-icon">
+            </a>
+            <h1 class="school-name">חנות סוס</h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">דף הבית</a></li>
+                    <li><a href="products.html">מוצרים</a></li>
+                    <li class="active"><a href="cart.html">עגלת קניות</a></li>
+                    <li><a href="contact.html">יצירת קשר</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-content cart-page">
+            <h2>עגלת הקניות שלך</h2>
+            
+            <div class="cart-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>מוצר</th>
+                            <th>מחיר ליחידה</th>
+                            <th>כמות</th>
+                            <th>סה"כ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cart-items">
+                    </tbody>
+                </table>
+                
+                <div class="cart-summary">
+                    <p class="total-price">מחיר כולל: <span id="total-price">0 ש"ח</span></p>
+                    <button class="checkout-btn" onclick="handleCheckout()">למעבר לתשלום</button>
+                    <button class="clear-cart-btn" onclick="handleClearCart()">ריקון עגלה</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <p> &copy; 2025 חנות סוס. כל הזכויות שמורות.</p>
+        <p>טלפון: כשר | אימייל:  popomikal43@gmail.com</p>
+    </footer>
+
+    <script>
+        function displayMessage(title, message, isConfirm = false, onConfirm = null) {
+            const messageBox = document.createElement('div');
+            messageBox.classList.add('message-overlay');
+            messageBox.innerHTML = `
+                <div class="message-content">
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                    ${isConfirm ? `
+                        <button class="confirm-btn">אשר</button>
+                        <button class="cancel-btn">ביטול</button>
+                    ` : `
+                        <button class="close-message-btn">סגור</button>
+                    `}
+                </div>
+            `;
+            document.body.appendChild(messageBox);
+
+            if (isConfirm) {
+                messageBox.querySelector('.confirm-btn').addEventListener('click', () => {
+                    messageBox.remove();
+                    if (onConfirm) onConfirm();
+                });
+                messageBox.querySelector('.cancel-btn').addEventListener('click', () => {
+                    messageBox.remove();
+                });
+            } else {
+                messageBox.querySelector('.close-message-btn').addEventListener('click', () => {
+                    messageBox.remove();
+                });
+            }
+        }
+
+        function displayCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cart-items');
+            let totalPrice = 0;
+
+            cartItemsContainer.innerHTML = '';
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<tr><td colspan="4">עגלת הקניות ריקה.</td></tr>';
+            } else {
+                cart.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    const itemTotal = item.price * item.quantity;
+                    totalPrice += itemTotal;
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.price} ש"ח</td>
+                        <td>
+                            <div class="quantity-control-cart">
+                                <button onclick="updateQuantity(${index}, -1)">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateQuantity(${index}, 1)">+</button>
+                            </div>
+                        </td>
+                        <td>${itemTotal} ש"ח</td>
+                    `;
+                    cartItemsContainer.appendChild(row);
+                });
+            }
+
+            document.getElementById('total-price').innerText = totalPrice + ' ש"ח';
+        }
+
+        function updateQuantity(index, change) {
+            const cart = JSON.parse(localStorage.getItem('cart'));
+            
+            cart[index].quantity += change;
+
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function clearCart() {
+            localStorage.removeItem('cart');
+            displayCart();
+        }
+        
+        function handleClearCart() {
+            displayMessage(
+                'אשר ריקון עגלה',
+                'האם אתה בטוח שברצונך לרוקן את העגלה?',
+                true,
+                clearCart
+            );
+        }
+
+        function handleCheckout() {
+            displayMessage(
+                'הודעה חשובה',
+                'האתר הזה הוא בדיחה, כל המוצרים באתר הזה זה תמונות ב AI',
+                false
+            );
+        }
+
+        document.addEventListener('DOMContentLoaded', displayCart);
+    </script>
+</body>
+</html>
